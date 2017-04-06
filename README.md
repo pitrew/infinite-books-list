@@ -18,7 +18,7 @@ Open http://localhost:3000 in your browser.
 * You can sort by book and author name clicking on column headers (Name or Author) 
 * Clicking twice changes sort order from ascending to descending. The arrow will indicate the order.
 * If you want to clear sort order click the column one more time
-* If you want to filter books there are two filters available. Book genre and author gender. Select desired values from dropdawn list
+* If you want to filter books there are two filters available. Book genre and author gender. Select desired values from dropdown list
 * If the book is of genre Finance and was published on the last Friday of the month it's marked with greenish background
 * If the book is a Horror one and was published on Halloween it's marked with orange background
 
