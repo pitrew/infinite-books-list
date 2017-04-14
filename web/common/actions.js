@@ -1,16 +1,20 @@
 
 import { 
-	FETCH_BOOKS_REQUESTED, FETCH_BOOKS_SUCCEEDED, FETCH_BOOKS_ERROR, SORT_BOOKS, BOOKS_FILTER_CHANGED,
+	FETCH_BOOKS_REQUESTED, 
+	FETCH_BOOKS_SUCCEEDED, 
+	FETCH_BOOKS_ERROR, 
+	SORT_BOOKS, 
+	BOOKS_FILTER_CHANGED,
+	SET_PAGE_BOOKS,
 } from './constants';
 
-export const fetchBooks = (reset = true) => ({ 
+export const fetchBooks = () => ({ 
 	type: FETCH_BOOKS_REQUESTED,
-	reset,
 });
-export const fetchBooksSuccess = (books, newList) => ({ 
+export const fetchBooksSuccess = (books, pagination) => ({ 
 	type: FETCH_BOOKS_SUCCEEDED,
 	books,
-	newList,
+	pagination,
 });
 export const fetchBooksError = (err) => ({ 
 	type: FETCH_BOOKS_ERROR, 
@@ -27,3 +31,10 @@ export const changeFilter = (key, value) => ({
 	key,
 	value,
 });
+
+export const setPageBooks = (pageNum) => ({ 
+	type: SET_PAGE_BOOKS, 
+	pageNum,
+});
+
+

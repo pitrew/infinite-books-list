@@ -41,18 +41,21 @@ exports.register = function (server, options, next) {
                 if (err) {
                     return reply(Boom.wrap(err, 'Internal MongoDB error'));
                 }
-                const pagination = {
-                    start,
-                    size,
-                    results: books.length,
-                };
+                db.books.find(dbFilter).count((err, total) => {
+                    const pagination = {
+                        start,
+                        size,
+                        total,
+                        results: books.length,
+                    };
 
-                const result = {
-                    pagination,
-                    books,
-                };
+                    const result = {
+                        pagination,
+                        books,
+                    };
 
-                reply(result);
+                    reply(result);    
+                });
             });
         }
     });

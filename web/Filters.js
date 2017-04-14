@@ -7,6 +7,7 @@ import { filterObjSelector } from './common/selectors';
 import { 
 	changeFilter,
 	fetchBooks,
+	setPageBooks,
 } from './common/actions';
 
 import bookGenres from './bookGenres';
@@ -23,11 +24,13 @@ class Filters extends React.Component {
 
 	handleGenreChange(event, index, value) {
 		this.props.changeFilter('genre', value);
+		this.props.setPageBooks(0);
 		this.props.fetchBooks();
 	}
 
 	handleAuthorGenderChange(event, index, value) {
 		this.props.changeFilter('author.gender', value);
+		this.props.setPageBooks(0);
 		this.props.fetchBooks();
 	}
 
@@ -60,6 +63,7 @@ const mapStateToProps = (state) => ({
 const mapDispatchToProps = {
 	changeFilter,
 	fetchBooks,
+	setPageBooks,
 };
 
 export default connect(mapStateToProps, mapDispatchToProps)(Filters);

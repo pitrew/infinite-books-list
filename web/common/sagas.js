@@ -23,15 +23,12 @@ function *fetchBooks(action) {
 		const pagination = yield select(paginationSelector);
 		const sort = yield select(sortSelector);
 		const filter = yield select(filterSelector);
-		let nextBook = 0;
-		if (!action.reset) {
-			nextBook = yield select(booksLengthSelector);
-		}
-		const res = yield fetch(`/api/books/${nextBook}/${pagination.more_size}/${sort}/${filter}`, {
+		const start = pagination.page * pagination.more_size;
+		const res = yield fetch(`/api/books/${start}/${pagination.more_size}/${sort}/${filter}`, {
 			method: 'get',
 		});
 		const data = yield res.json();
-		yield put(fetchBooksSuccess(data.books, action.reset));
+		yield put(fetchBooksSuccess(data.books, data.pagination));
 	} catch (err) {
 		yield put(fetchBooksError('Cannot get books' + err));
 	}

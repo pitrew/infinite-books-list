@@ -4,8 +4,11 @@ const booksState = state => state.books;
 const paginationState = state => state.pagination;
 const sortState = state => state.sort;
 const filterState = state => state.filter;
+const loadingState = state => state.loading;
 
 export const booksSelector = createSelector(booksState, books => books);
+export const loadingSelector = createSelector(loadingState, loading => loading);
+
 export const booksLengthSelector = createSelector(booksState, books => books.length);
 
 export const paginationSelector = createSelector(paginationState, pagination => pagination);

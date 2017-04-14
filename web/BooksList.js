@@ -1,14 +1,21 @@
 
 import React from 'react';
+import ReactDOM from 'react-dom';
+
 import { connect } from 'react-redux';
-import {Table, TableBody, TableHeader, TableHeaderColumn, TableRow, TableRowColumn} from 'material-ui/Table';
+import {Table, TableBody, TableHeader, TableHeaderColumn, TableRow, TableRowColumn, TableFooter} from 'material-ui/Table';
 import ArrowDown from 'material-ui/svg-icons/navigation/arrow-downward';
 import ArrowUp from 'material-ui/svg-icons/navigation/arrow-upward';
 
-import { booksSelector, sortObjSelector } from './common/selectors';
+import { booksSelector, 
+	sortObjSelector, 
+	paginationSelector,
+	loadingSelector
+} from './common/selectors';
 import { 
 	fetchBooks,
 	sortBooks,
+	setPageBooks,
 } from './common/actions';
 
 const halloweenStyle = {
@@ -25,33 +32,53 @@ const iconStyle = {
 	width: '12px',
 };
 
+const blur = {
+  '-webkit-filter': 'blur(5px)',
+  '-moz-filter': 'blur(5px)',
+  '-o-filter': 'blur(5px)',
+  '-ms-filter': 'blur(5px)',
+  'filter': 'blur(5px)',
+};
+
+const blurLoading = {
+	...blur,
+  	'background-color': '#ccc'
+};
+
+const blurError = {
+	...blur,
+  	'background-color': '#c00'
+};
+
 class BooksList extends React.Component {
     constructor(props) {
     	super(props);
-
-    	this.handleScroll = this.handleScroll.bind(this);
     }
 
+	totalPages() {
+		return Math.ceil(this.props.pagination.total / this.props.pagination.more_size);
+	}
+
+	handleScroll(event) {
+		if ((event.srcElement.scrollTop === 0) && (this.props.pagination.page > 0)) {
+			this.props.setPageBooks(this.props.pagination.page - 1);
+			this.props.fetchBooks();
+			event.srcElement.scrollTop = event.srcElement.scrollHeight - event.srcElement.offsetHeight - 1;
+		} else if ((event.srcElement.scrollTop === event.srcElement.scrollHeight - event.srcElement.offsetHeight) &&
+			(this.props.pagination.page < this.totalPages() - 1)) {
+			this.props.setPageBooks(this.props.pagination.page + 1);
+			this.props.fetchBooks();
+			event.srcElement.scrollTop = 1;
+		}
+	}
+    
 	componentWillMount() {
 		this.props.fetchBooks();
-		window.addEventListener('scroll', this.handleScroll);
 	}
-	componentWillUnmount() {
-	    window.removeEventListener('scroll', this.handleScroll);
-	}
-	handleScroll(event) {
-
-		if (this.scrollTimer) {
-			clearTimeout(this.scrollTimer);
-		}
-		this.scrollTimer = setTimeout(() => {
-			const scrollTop = event.srcElement.body.scrollTop;
-			const scrollHeight = event.srcElement.body.scrollHeight;
-
-			if(window.innerHeight + scrollTop > scrollHeight - 500) {
-				this.props.fetchBooks(false);	
-			}			
-		}, 50);
+	componentDidMount() {
+	  this.viewport.addEventListener('scroll', (e) => {
+	    this.handleScroll(e);
+	  });
 	}
 	isLastFriday(day, month, year) {
 	    const newYear = year + (month === 12 ? 1 : 0);
@@ -72,9 +99,6 @@ class BooksList extends React.Component {
 		const month = d[0];
 		const year = d[2];
 
-		
-		const dt = new Date(Date.UTC(year, month, day));
-
 		if (genre === 'Horror' && day === 31 && month === 10) {
 			rowStyle = {...rowStyle, ...halloweenStyle};
 		} else if (genre === 'Finance' && this.isLastFriday(day, month, year)) {
@@ -82,6 +106,7 @@ class BooksList extends React.Component {
 		}
 		return rowStyle;
 	}
+
 	render() {
 		const sortBook = (this.props.sort.key === 'book' ?
 							(this.props.sort.order === 'desc' ?
@@ -90,8 +115,14 @@ class BooksList extends React.Component {
 							(this.props.sort.order === 'desc' ?
 								<ArrowUp style={iconStyle} /> : <ArrowDown style={iconStyle} />) : '');
 
+		const tableStyle = this.props.loading.error ? blurError :
+			(this.props.loading.active ? blurLoading : {});
+
 		return (<div>
-			<Table selectable={false}>
+			<Table selectable={false}
+					height={"410px"}
+					fixedHeader={true}
+					fixedFooter={true}>
 			    <TableHeader displaySelectAll={false} adjustForCheckbox={false}>
 			      <TableRow>
 			        <TableHeaderColumn onTouchTap={() => {
@@ -106,12 +137,20 @@ class BooksList extends React.Component {
 			        <TableHeaderColumn>Publish date</TableHeaderColumn>
 			      </TableRow>
 			    </TableHeader>
-			    <TableBody displayRowCheckbox={false}>
+			    <TableBody displayRowCheckbox={false}
+			    	style={tableStyle}
+				    ref={ref => {
+				    	if (ref) { 
+					    	this.viewport = ReactDOM.findDOMNode(ref);
+					    	this.viewport = this.viewport.parentNode; 
+					    	this.viewport = this.viewport.parentNode;
+					    }
+				    } } >
 			    {
 					this.props.books.map((book) => {
 						const rowStyle = this.getRowStyle(book.publish_date, book.genre);
 
-						return (<TableRow key={book.name} style={rowStyle}>
+						return (<TableRow key={book._id} style={rowStyle}>
 					        <TableRowColumn>{book.name}</TableRowColumn>
 					        <TableRowColumn>{book.author.name}</TableRowColumn>
 					        <TableRowColumn>{book.genre}</TableRowColumn>
@@ -128,11 +167,14 @@ class BooksList extends React.Component {
 const mapStateToProps = (state) => ({
 	books: booksSelector(state),
 	sort: sortObjSelector(state),
+	pagination: paginationSelector(state),
+	loading: loadingSelector(state),
 });
 
 const mapDispatchToProps = {
 	fetchBooks,
 	sortBooks,
+	setPageBooks,
 };
 
 export default connect(mapStateToProps, mapDispatchToProps)(BooksList);

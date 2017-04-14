@@ -14,7 +14,7 @@ npm start
 Open http://localhost:3000 in your browser.
 
 ## How to use
-* To load more books scroll to the bottom of the page
+* To load more books scroll the list
 * You can sort by book and author name clicking on column headers (Name or Author) 
 * Clicking twice changes sort order from ascending to descending. The arrow will indicate the order.
 * If you want to clear sort order click the column one more time
